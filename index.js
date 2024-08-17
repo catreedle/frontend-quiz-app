@@ -1,5 +1,6 @@
 let score = 0;
 let quizIndex = 0;
+let totalQuestions = 0;
 let answer = "";
 
 // quiz menu
@@ -14,6 +15,9 @@ const questionNumber = document.getElementById("question-number");
 const totalQuestionElement = document.getElementById("total-question");
 const quizQuestion = document.querySelector(".quiz__question");
 const quizQuestionText = document.querySelector(".quiz__question__text");
+const quizProgressBar = document.querySelector(
+  ".quiz__question__progress__loaded"
+);
 const quizAnswerChoices = document.querySelector(".quiz__answer__choices");
 const submitButton = document.querySelector(".quiz__answer__submit");
 const nextButton = document.querySelector(".quiz__answer__next");
@@ -55,9 +59,8 @@ function showMenuSection() {
         quizTopic = el.textContent;
         const topicImageContainer = document.querySelector(`.img-${quizTopic}`);
         const topicImageUrl = topicImageContainer.querySelector("img").src;
-        const totalQuestions = quizzes.find(
-          (quiz) => quiz.title === quizTopic
-        ).questions.length;
+        totalQuestions = quizzes.find((quiz) => quiz.title === quizTopic)
+          .questions.length;
         showQuestionSection(quizTopic, quizzes);
         setCompletedQuizTopic(quizTopic, topicImageUrl, totalQuestions);
       });
@@ -81,6 +84,12 @@ function showMenuSection() {
 
 showMenuSection();
 
+function showQuizProgress(quizIndex, totalQuestions) {
+  const width = ((quizIndex + 1) / totalQuestions) * 100 + "%";
+  quizProgressBar.style.width = width;
+  console.log(quizProgressBar.style);
+}
+
 function showQuestionSection(quizTopic, quizzes) {
   startQuiz();
   const imageSource = quizzes.find((quiz) => quiz.title === quizTopic).icon;
@@ -88,6 +97,7 @@ function showQuestionSection(quizTopic, quizzes) {
   const quiz = getQuestion(quizzes, quizTopic, quizIndex);
   answer = quiz.answer;
   quizQuestionText.textContent = quiz.question;
+  showQuizProgress(quizIndex, totalQuestions);
 
   let options = "";
   function escapeHtml(text) {
