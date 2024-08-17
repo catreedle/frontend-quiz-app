@@ -3,6 +3,13 @@ let quizIndex = 0;
 let totalQuestions = 0;
 let answer = "";
 
+// toggle theme
+const toggleDarkMode = document.getElementById("toggle-dark-mode");
+const iconSunDark = document.getElementById("sun-dark");
+const iconSunLight = document.getElementById("sun-light");
+const iconMoonDark = document.getElementById("moon-dark");
+const iconMoonLight = document.getElementById("moon-light");
+
 // quiz menu
 const quizMenu = document.querySelector(".quiz__menu");
 const quizMenuOptions = document.getElementById("quiz-menu-options");
@@ -83,6 +90,18 @@ function showMenuSection() {
 }
 
 showMenuSection();
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute("data-theme");
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", newTheme);
+  iconSunDark.classList.toggle("hidden");
+  iconSunLight.classList.toggle("hidden");
+  iconMoonDark.classList.toggle("hidden");
+  iconMoonLight.classList.toggle("hidden");
+}
+
+toggleDarkMode.addEventListener("input", toggleTheme);
 
 function showQuizProgress(quizIndex, totalQuestions) {
   const width = ((quizIndex + 1) / totalQuestions) * 100 + "%";
