@@ -78,8 +78,8 @@ body {
 }
 
 .quiz__nav__start {
-    color: var(--main-text-color);
-    font-weight: 500;
+  color: var(--main-text-color);
+  font-weight: 500;
 }
 
 /* The switch - the box around the slider */
@@ -376,6 +376,7 @@ input:checked + .quiz__nav__toggle:before {
     flex-direction: row;
     justify-content: space-between;
     gap: 131px;
+    margin: 0 140px;
   }
 
   .quiz__menu__header,
@@ -385,10 +386,16 @@ input:checked + .quiz__nav__toggle:before {
   .quiz__menu__welcome,
   .quiz__completed__header__text {
     font-size: 64px;
+    line-height: 100%;
   }
 
   .quiz__menu__instruction {
     font-size: 20px;
+  }
+
+  .quiz__options,
+  .quiz__answer__container {
+    gap: 24px;
   }
 
   .quiz__question__container {
