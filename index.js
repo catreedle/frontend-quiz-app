@@ -55,7 +55,7 @@ function showMenuSection() {
     let quizTopic = "";
     let quizMenuOptionsContent = "";
     quizzes.forEach((quiz) => {
-      quizMenuOptionsContent += `<li class="quiz__menu__option quiz__option"><div class="img-${quiz.title}"><img src=${quiz.icon} alt=${quiz.title}></div><span>${quiz.title}</span></li>`;
+      quizMenuOptionsContent += `<li class="quiz__menu__option quiz__option" tabindex="0"><div class="img-${quiz.title}"><img src=${quiz.icon} alt=${quiz.title}></div><span>${quiz.title}</span></li>`;
     });
     quizMenuOptions.innerHTML = quizMenuOptionsContent;
 
@@ -72,6 +72,8 @@ function showMenuSection() {
         setCompletedQuizTopic(quizTopic, topicImageUrl, totalQuestions);
       });
     });
+
+    clickOnKeyPress();
 
     nextButton.addEventListener("click", nextQuestion);
     function nextQuestion() {
@@ -106,7 +108,6 @@ toggleDarkMode.addEventListener("input", toggleTheme);
 function showQuizProgress(quizIndex, totalQuestions) {
   const width = ((quizIndex + 1) / totalQuestions) * 100 + "%";
   quizProgressBar.style.width = width;
-  console.log(quizProgressBar.style);
 }
 
 function showQuestionSection(quizTopic, quizzes) {
@@ -129,7 +130,7 @@ function showQuestionSection(quizTopic, quizzes) {
   }
   quiz.options.forEach((option, index) => {
     option = escapeHtml(option);
-    options += `<li class="quiz__option quiz__answer__option" id="answer-${option}">
+    options += `<li class="quiz__option quiz__answer__option" id="answer-${option}" tabindex="0">
                   <label for="${option}">
                         <input style="display: none" name="option" id="${option}" type="radio" value="${option}">
                         <span class="quiz__option__alphabet">${alphabetOptions[index]}
@@ -146,8 +147,16 @@ function showQuestionSection(quizTopic, quizzes) {
   quizOption.forEach((el) => {
     el.addEventListener("click", function () {
       noAnswerWarning.classList.add("hidden");
+      const radioInputs = document.querySelectorAll('input[name="option"]');
+      const checkedInput = Array.from(radioInputs).find(
+        (input) => input.value === el.id.split("-")[1]
+      );
+
+      checkedInput.checked = true;
     });
   });
+
+  clickOnKeyPress();
 }
 
 function getQuestion(quizData, topic, number) {
@@ -235,6 +244,16 @@ function setCompletedQuizTopic(topic, iconQuizUrl, totalQuiz) {
   quizCompletedIcon.src = iconQuizUrl;
   quizCompletedIcon.classList.add(`img-${topic}`);
   quizCompletedTotal.textContent = totalQuiz;
+}
+
+function clickOnKeyPress() {
+  document.querySelectorAll('[tabindex="0"]').forEach((el) => {
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        el.click(); // Simulate a click
+      }
+    });
+  });
 }
 
 submitButton.addEventListener("click", submitAnswer);

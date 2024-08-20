@@ -282,7 +282,8 @@ input:checked + .quiz__nav__toggle:before {
   cursor: pointer;
 }
 
-.quiz__button:hover {
+.quiz__button:hover,
+.quiz__button:focus {
   opacity: 50%;
 }
 
