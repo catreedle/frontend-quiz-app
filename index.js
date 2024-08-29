@@ -55,7 +55,7 @@ function showMenuSection() {
     let quizTopic = "";
     let quizMenuOptionsContent = "";
     quizzes.forEach((quiz) => {
-      quizMenuOptionsContent += `<li class="quiz__menu__option quiz__option" tabindex="0"><div class="img-${quiz.title}"><img src=${quiz.icon} alt=${quiz.title}></div><span>${quiz.title}</span></li>`;
+      quizMenuOptionsContent += `<li class="quiz__menu__option quiz__option" tabindex="0"><div class="img-${quiz.title}"><img src=${quiz.icon} alt="title-${quiz.title}"></div><span>${quiz.title}</span></li>`;
     });
     quizMenuOptions.innerHTML = quizMenuOptionsContent;
 
@@ -113,7 +113,7 @@ function showQuizProgress(quizIndex, totalQuestions) {
 function showQuestionSection(quizTopic, quizzes) {
   startQuiz();
   const imageSource = quizzes.find((quiz) => quiz.title === quizTopic).icon;
-  quizTopicShow.innerHTML = `<img class="img-${quizTopic}" src="${imageSource}" alt="${quizTopic}"><span>${quizTopic}</span>`;
+  quizTopicShow.innerHTML = `<img class="img-${quizTopic}" src="${imageSource}" alt="topic-${quizTopic}"><span>${quizTopic}</span>`;
   const quiz = getQuestion(quizzes, quizTopic, quizIndex);
   answer = quiz.answer;
   quizQuestionText.textContent = quiz.question;
@@ -249,7 +249,7 @@ function setCompletedQuizTopic(topic, iconQuizUrl, totalQuiz) {
 function clickOnKeyPress() {
   document.querySelectorAll('[tabindex="0"]').forEach((el) => {
     el.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
+      if (event.key === "Enter") {
         el.click(); // Simulate a click
       }
     });

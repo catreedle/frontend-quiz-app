@@ -34,7 +34,7 @@
           src="/assets/images/icon-sun-light.svg"
           alt="icon-sun"
         />
-        <label class="quiz__nav__label" tabindex="0">
+        <label for="toggle-dark-mode" class="quiz__nav__label" tabindex="0">
           <input type="checkbox" id="toggle-dark-mode" />
           <span class="quiz__nav__toggle"></span>
         </label>
@@ -51,80 +51,87 @@
         />
       </div>
     </nav>
-    <section class="quiz__menu">
-      <header class="quiz__menu__header">
-        <h1 class="quiz__menu__welcome">
-          Welcome to the<br /><span>Frontend Quiz!</span>
-        </h1>
-        <p class="quiz__menu__instruction">Pick a subject to get started.</p>
-      </header>
-
-      <ul class="quiz__menu__options quiz__options" id="quiz-menu-options"></ul>
-    </section>
-    <!-- Quiz menu end -->
-
-    <!-- Quiz question start -->
-    <section class="quiz__question hidden">
-      <div class="quiz__header__question__container">
-        <header class="quiz__question__number">
-          <p>
-            Question <span id="question-number">&nbsp;</span> of
-            <span id="total-question">&nbsp;</span>
-          </p>
+    <main>
+      <section class="quiz__menu">
+        <header class="quiz__menu__header">
+          <h1 class="quiz__menu__welcome">
+            Welcome to the<br /><span>Frontend Quiz!</span>
+          </h1>
+          <p class="quiz__menu__instruction">Pick a subject to get started.</p>
         </header>
 
-        <div class="quiz__question__container">
-          <p class="quiz__question__text">&nbsp;</p>
-          <div class="quiz__question__progress">
-            <div class="quiz__question__progress__loaded"></div>
-          </div>
-        </div>
-      </div>
+        <ul
+          class="quiz__menu__options quiz__options"
+          id="quiz-menu-options"
+        ></ul>
+      </section>
+      <!-- Quiz menu end -->
 
-      <div class="quiz__answer__container">
-        <ul class="quiz__answer__choices quiz__options"></ul>
-        <button class="quiz__button quiz__answer__submit">Submit Answer</button>
-        <button class="quiz__button quiz__answer__next hidden">
-          Next Question
-        </button>
-        <div class="quiz__warning__no-answer hidden">
-          <img
-            src="/assets/images/icon-error.svg"
-            alt="icon-error"
-            srcset=""
-          /><span>Please select an answer</span>
-        </div>
-      </div>
-    </section>
-    <!-- Quiz question end -->
-
-    <!-- Quiz completed start -->
-    <section class="quiz__completed hidden">
-      <header class="quiz__completed__header">
-        <h1 class="quiz__completed__header__text">
-          Quiz completed<br /><span>You scored...</span>
-        </h1>
-      </header>
-
-      <div class="quiz__completed__content">
-        <div class="quiz__result__card">
-          <div class="quiz__result__header">
-            <img src="" alt="icon-quiz" id="icon-quiz-completed" />
-            <span class="quiz__completed__topic">&nbsp;</span>
-          </div>
-          <!-- score -->
-          <div>
-            <p class="quiz__result__score">&nbsp;</p>
-            <br />
-            <p class="quiz__result__total">
-              out of <span id="quiz-completed-total">&nbsp;</span>
+      <!-- Quiz question start -->
+      <section class="quiz__question hidden">
+        <div class="quiz__header__question__container">
+          <header class="quiz__question__number">
+            <p>
+              Question <span id="question-number">&nbsp;</span> of
+              <span id="total-question">&nbsp;</span>
             </p>
+          </header>
+
+          <div class="quiz__question__container">
+            <p class="quiz__question__text">&nbsp;</p>
+            <div class="quiz__question__progress">
+              <div class="quiz__question__progress__loaded"></div>
+            </div>
           </div>
         </div>
 
-        <button class="quiz__button quiz__play__again">Play Again</button>
-      </div>
-    </section>
-    <!-- Quiz completed end -->
+        <div class="quiz__answer__container">
+          <ul class="quiz__answer__choices quiz__options"></ul>
+          <button class="quiz__button quiz__answer__submit">
+            Submit Answer
+          </button>
+          <button class="quiz__button quiz__answer__next hidden">
+            Next Question
+          </button>
+          <div class="quiz__warning__no-answer hidden">
+            <img
+              src="/assets/images/icon-error.svg"
+              alt="icon-error"
+              srcset=""
+            /><span>Please select an answer</span>
+          </div>
+        </div>
+      </section>
+      <!-- Quiz question end -->
+
+      <!-- Quiz completed start -->
+      <section class="quiz__completed hidden">
+        <header class="quiz__completed__header">
+          <h1 class="quiz__completed__header__text">
+            Quiz completed<br /><span>You scored...</span>
+          </h1>
+        </header>
+
+        <div class="quiz__completed__content">
+          <div class="quiz__result__card">
+            <div class="quiz__result__header">
+              <img src="" alt="icon-quiz" id="icon-quiz-completed" />
+              <span class="quiz__completed__topic">&nbsp;</span>
+            </div>
+            <!-- score -->
+            <div>
+              <p class="quiz__result__score">&nbsp;</p>
+              <br />
+              <p class="quiz__result__total">
+                out of <span id="quiz-completed-total">&nbsp;</span>
+              </p>
+            </div>
+          </div>
+
+          <button class="quiz__button quiz__play__again">Play Again</button>
+        </div>
+      </section>
+      <!-- Quiz completed end -->
+    </main>
   </body>
 </html>
