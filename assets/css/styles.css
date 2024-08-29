@@ -164,10 +164,11 @@ input:checked + .quiz__nav__toggle:before {
   font-weight: 500;
 }
 
-.quiz__menu__instruction {
+.quiz__text__italic {
   font-size: 14px;
   font-style: italic;
   color: var(--secondary-text-color);
+  font-weight: normal;
 }
 
 .quiz__question__container {
@@ -390,7 +391,7 @@ input:checked + .quiz__nav__toggle:before {
     line-height: 100%;
   }
 
-  .quiz__menu__instruction {
+  .quiz__text__italic {
     font-size: 20px;
   }
 
