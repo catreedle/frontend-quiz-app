@@ -17,7 +17,6 @@
     <title>Frontend Mentor | Frontend quiz app</title>
   </head>
   <body>
-    <!-- Quiz menu start -->
     <nav class="quiz__nav">
       <div class="quiz__nav__start"></div>
       <!-- Rounded toggle -->
@@ -34,8 +33,12 @@
           src="/assets/images/icon-sun-light.svg"
           alt="icon-sun"
         />
-        <label for="toggle-dark-mode" class="quiz__nav__label" tabindex="0">
-          <input type="checkbox" id="toggle-dark-mode" aria-label="Toggle Dark Mode"/>
+        <label for="toggle-theme" class="quiz__nav__label" tabindex="0">
+          <input
+            type="checkbox"
+            id="toggle-theme"
+            aria-label="Toggle Dark Mode"
+          />
           <span class="quiz__nav__toggle"></span>
         </label>
         <img
@@ -52,6 +55,7 @@
       </div>
     </nav>
     <main>
+      <!-- Quiz menu start -->
       <section class="quiz__menu">
         <header class="quiz__menu__header">
           <h1 class="quiz__menu__welcome">
@@ -93,11 +97,11 @@
           <button class="quiz__button quiz__answer__next hidden">
             Next Question
           </button>
+          <button class="quiz__button quiz__result hidden">View Result</button>
           <div class="quiz__warning__no-answer hidden">
-            <img
-              src="/assets/images/icon-error.svg"
-              alt="icon-error"
-            /><span>Please select an answer</span>
+            <img src="/assets/images/icon-error.svg" alt="icon-error" /><span
+              >Please select an answer</span
+            >
           </div>
         </div>
       </section>
@@ -114,7 +118,11 @@
         <div class="quiz__completed__content">
           <div class="quiz__result__card">
             <div class="quiz__result__header">
-              <img src="/assets/images/icon-accessibility.svg" alt="icon-quiz" id="icon-quiz-completed" />
+              <img
+                src="/assets/images/icon-accessibility.svg"
+                alt="icon-quiz"
+                id="icon-quiz-completed"
+              />
               <span class="quiz__completed__topic">&nbsp;</span>
             </div>
             <!-- score -->

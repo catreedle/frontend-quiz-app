@@ -231,6 +231,24 @@ input:checked + .quiz__nav__toggle:before {
   background-color: var(--color-purple);
 }
 
+.quiz__correct-answer-border {
+  border: 3px solid var(--color-green) !important;
+}
+
+.quiz__correct-answer-alphabet {
+  color: var(--color-pure-white);
+  background-color: var(--color-green) !important;
+}
+
+.quiz__incorrect-answer-border {
+  border: 3px solid var(--color-red) !important;
+}
+
+.quiz__incorrect-answer-alphabet {
+  color: var(--color-pure-white);
+  background-color: var(--color-red) !important;
+}
+
 .quiz__option:hover .quiz__option__alphabet {
   background-color: #f6e7ff;
   color: var(--color-purple);

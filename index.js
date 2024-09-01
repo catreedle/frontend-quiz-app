@@ -1,253 +1,418 @@
-let score = 0;
-let quizIndex = 0;
-let totalQuestions = 0;
-let answer = "";
+const initialQuizState = {
+  topic: "",
+  questions: [],
+  score: 0,
+  quizIndex: 0,
+  totalQuestions: 0,
+  imageSource: "",
+};
 
-// toggle theme
-const toggleDarkMode = document.getElementById("toggle-dark-mode");
-const iconSunDark = document.getElementById("sun-dark");
-const iconSunLight = document.getElementById("sun-light");
-const iconMoonDark = document.getElementById("moon-dark");
-const iconMoonLight = document.getElementById("moon-light");
+let quizState = { ...initialQuizState };
 
-// quiz menu
-const quizMenu = document.querySelector(".quiz__menu");
+const toggleThemeElement = document.getElementById("toggle-theme");
+const quizMenuSection = document.querySelector(".quiz__menu");
 const quizMenuOptions = document.getElementById("quiz-menu-options");
-
-// quiz questions
-let quizTopic = "";
-const alphabetOptions = ["A", "B", "C", "D"];
-const quizTopicShow = document.querySelector(".quiz__nav__start");
-const questionNumber = document.getElementById("question-number");
-const totalQuestionElement = document.getElementById("total-question");
-const quizQuestion = document.querySelector(".quiz__question");
-const quizQuestionText = document.querySelector(".quiz__question__text");
-const quizProgressBar = document.querySelector(
-  ".quiz__question__progress__loaded"
-);
-const quizAnswerChoices = document.querySelector(".quiz__answer__choices");
+const quizQuestionSection = document.querySelector(".quiz__question");
+const quizCompletedSection = document.querySelector(".quiz__completed");
 const submitButton = document.querySelector(".quiz__answer__submit");
 const nextButton = document.querySelector(".quiz__answer__next");
-const noAnswerWarning = document.querySelector(".quiz__warning__no-answer");
+const viewResultButton = document.querySelector(".quiz__result");
+const playAgainButton = document.querySelector(".quiz__play__again");
 
-// quiz completed
-const quizCompleted = document.querySelector(".quiz__completed");
-const quizCompletedTopic = document.querySelector(".quiz__completed__topic");
-const quizCompletedIcon = document.getElementById("icon-quiz-completed");
-const quizResultScore = document.querySelector(".quiz__result__score");
-const quizCompletedTotal = document.getElementById("quiz-completed-total");
-const quizPlayAgain = document.querySelector(".quiz__play__again");
-
-async function fetchQuizData() {
-  try {
-    const response = await fetch("/data.json");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-}
-
-function showMenuSection() {
-  fetchQuizData().then((data) => {
-    const quizData = data;
-    const quizzes = quizData.quizzes;
-    let quizTopic = "";
-    let quizMenuOptionsContent = "";
-    quizzes.forEach((quiz) => {
-      quizMenuOptionsContent += `<li class="quiz__menu__option quiz__option" tabindex="0"><div class="img-${quiz.title}"><img src=${quiz.icon} alt="title-${quiz.title}"></div><span>${quiz.title}</span></li>`;
+window.addEventListener("DOMContentLoaded", () => {
+  fetchQuizData()
+    .then((data) => {
+      initializeApp(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching quiz data:", error);
     });
-    quizMenuOptions.innerHTML = quizMenuOptionsContent;
+});
 
-    quizMenuOptionsListElements = quizMenuOptions.children;
-
-    Array.from(quizMenuOptionsListElements).forEach((el) => {
-      el.addEventListener("click", function () {
-        quizTopic = el.textContent;
-        const topicImageContainer = document.querySelector(`.img-${quizTopic}`);
-        const topicImageUrl = topicImageContainer.querySelector("img").src;
-        totalQuestions = quizzes.find((quiz) => quiz.title === quizTopic)
-          .questions.length;
-        showQuestionSection(quizTopic, quizzes);
-        setCompletedQuizTopic(quizTopic, topicImageUrl, totalQuestions);
-      });
-    });
-
-    clickOnKeyPress();
-
-    nextButton.addEventListener("click", nextQuestion);
-    function nextQuestion() {
-      quizIndex += 1;
-      const { quizzes } = quizData;
-      const quiz = getQuestion(quizzes, quizTopic, quizIndex);
-      if (!quiz) {
-        showResult();
-        return;
-      }
-      showQuestionSection(quizTopic, quizzes);
-      nextButton.classList.add("hidden");
-      submitButton.classList.remove("hidden");
-    }
-  });
-}
-
-showMenuSection();
-
-function toggleTheme() {
+function handleToggleTheme() {
+  const iconSunDark = document.getElementById("sun-dark");
+  const iconSunLight = document.getElementById("sun-light");
+  const iconMoonDark = document.getElementById("moon-dark");
+  const iconMoonLight = document.getElementById("moon-light");
   const currentTheme = document.documentElement.getAttribute("data-theme");
   const newTheme = currentTheme === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", newTheme);
+
   iconSunDark.classList.toggle("hidden");
   iconSunLight.classList.toggle("hidden");
   iconMoonDark.classList.toggle("hidden");
   iconMoonLight.classList.toggle("hidden");
 }
 
-toggleDarkMode.addEventListener("input", toggleTheme);
+toggleThemeElement.addEventListener("input", handleToggleTheme);
+toggleKeyPress();
 
-function showQuizProgress(quizIndex, totalQuestions) {
+function initializeApp(quizData) {
+  showMenuSection(quizData);
+  attachMenuEventListener(quizData);
+}
+
+async function fetchQuizData() {
+  try {
+    const response = await fetch("/data.json");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch error:", error);
+    throw error; // Rethrow to be handled in the .catch() of the calling function
+  }
+}
+
+// menu section
+function showMenuSection(quizData) {
+  const quizzes = quizData.quizzes;
+
+  let quizMenuOptionsContent = "";
+  quizzes.forEach((quiz) => {
+    quizMenuOptionsContent += `
+        <li class="quiz__menu__option quiz__option clickable" tabindex="0">
+          <div class="img-${quiz.title}">
+            <img src=${quiz.icon} alt="title-${quiz.title}">
+          </div>
+          <span>${quiz.title}</span>
+        </li>`;
+  });
+  quizMenuOptions.innerHTML = quizMenuOptionsContent;
+}
+
+function attachMenuEventListener(quizData) {
+  const quizMenuOptionsListItems = Array.from(quizMenuOptions.children);
+
+  quizMenuOptionsListItems.forEach((li) => {
+    li.addEventListener("click", (event) =>
+      handleMenuItemClick(event, quizData)
+    );
+  });
+
+  selectOnKeyPress(); //
+}
+
+function handleMenuItemClick(event, quizData) {
+  const quizTopic = getQuizTopic(event);
+  const quizzes = getQuizzesByTopic(quizTopic, quizData);
+  quizState = createQuizStateFromQuizzes(initialQuizState, quizzes);
+  quizState = updateImageSource(quizState, quizzes);
+  showQuestionSection(quizState);
+}
+
+// question section
+function getQuizTopic(event) {
+  return event.currentTarget.innerText;
+}
+
+function getQuizzesByTopic(quizTopic, quizData) {
+  const { quizzes } = quizData;
+  const selectedTopicQuizzes = quizzes.find((data) => data.title === quizTopic);
+  return selectedTopicQuizzes;
+}
+
+function createQuizStateFromQuizzes(initialQuizState, quizzes) {
+  return {
+    ...initialQuizState,
+    topic: quizzes.title,
+    questions: quizzes.questions,
+    totalQuestions: quizzes.questions.length,
+  };
+}
+
+function updateImageSource(quizState, selectedQuizzes) {
+  return {
+    ...quizState,
+    imageSource: selectedQuizzes.icon,
+  };
+}
+
+function toggleVisibility(element, isVisible) {
+  element.classList.toggle("hidden", !isVisible);
+}
+
+function showQuestionSection(quizState) {
+  toggleSectionsVisibility();
+  updateQuizContent(quizState);
+}
+
+function toggleSectionsVisibility() {
+  toggleVisibility(quizMenuSection, false);
+  toggleVisibility(quizQuestionSection, true);
+}
+
+function updateQuizContent(quizState) {
+  setHeader(quizState.topic);
+  setQuestion(quizState);
+  setOptions(quizState);
+  setNumber(quizState);
+  setProgress(quizState);
+  setSubmitButton(quizState);
+  attachOptionEventListener();
+}
+
+function setHeader(topic) {
+  const quizHeader = document.querySelector(".quiz__nav__start");
+  quizHeader.innerHTML = `<img class="img-${topic}" src="${quizState.imageSource}" alt="topic-${topic}"><span>${topic}</span>`;
+}
+
+function setQuestion(quizState) {
+  const { questions, quizIndex } = quizState;
+  const questionElement = document.querySelector(".quiz__question__text");
+  questionElement.textContent = questions[quizIndex].question;
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function generateOptionHtml(option, index, alphabetOptions) {
+  const escapedOption = escapeHtml(option);
+  return `
+      <li class="quiz__option quiz__answer__option clickable" id="answer__${escapedOption}" tabindex="0">
+        <label for="${escapedOption}">
+          <input style="display: none" name="option" id="${escapedOption}" type="radio" value="${escapedOption}">
+          <span class="quiz__option__alphabet">${alphabetOptions[index]}</span>
+          ${escapedOption}
+          <img src="/assets/images/icon-correct.svg" alt="icon-correct" class="quiz__option__correct hidden">
+          <img src="/assets/images/icon-error.svg" alt="icon-error" class="quiz__option__error hidden">
+        </label>
+      </li>`;
+}
+
+function setOptions(quizState) {
+  const { questions, quizIndex } = quizState;
+  const optionsElement = document.querySelector(".quiz__answer__choices");
+  const options = questions[quizIndex].options;
+  const alphabetOptions = ["A", "B", "C", "D"];
+
+  const optionsContent = options
+    .map((option, index) => generateOptionHtml(option, index, alphabetOptions))
+    .join("");
+
+  optionsElement.innerHTML = optionsContent;
+}
+
+function setNumber(quizState) {
+  const { quizIndex, totalQuestions } = quizState;
+  const questionNumberElement = document.getElementById("question-number");
+  const totalQuestionElement = document.getElementById("total-question");
+  questionNumberElement.textContent = quizIndex + 1;
+  totalQuestionElement.textContent = totalQuestions;
+}
+
+function setProgress(quizState) {
+  const { quizIndex, totalQuestions } = quizState;
+  const quizProgressBar = document.querySelector(
+    ".quiz__question__progress__loaded"
+  );
   const width = ((quizIndex + 1) / totalQuestions) * 100 + "%";
   quizProgressBar.style.width = width;
 }
 
-function showQuestionSection(quizTopic, quizzes) {
-  startQuiz();
-  const imageSource = quizzes.find((quiz) => quiz.title === quizTopic).icon;
-  quizTopicShow.innerHTML = `<img class="img-${quizTopic}" src="${imageSource}" alt="topic-${quizTopic}"><span>${quizTopic}</span>`;
-  const quiz = getQuestion(quizzes, quizTopic, quizIndex);
-  answer = quiz.answer;
-  quizQuestionText.textContent = quiz.question;
-  showQuizProgress(quizIndex, totalQuestions);
-
-  let options = "";
-  function escapeHtml(text) {
-    return text
-      .replace(/&/g, "&amp;") // & becomes &amp;
-      .replace(/</g, "&lt;") // < becomes &lt;
-      .replace(/>/g, "&gt;") // > becomes &gt;
-      .replace(/"/g, "&quot;") // " becomes &quot;
-      .replace(/'/g, "&#039;"); // ' becomes &#039;
+function setNextButton(quizState) {
+  if (nextButton.handleClick) {
+    nextButton.removeEventListener("click", nextButton.handleClick);
   }
-  quiz.options.forEach((option, index) => {
-    option = escapeHtml(option);
-    options += `<li class="quiz__option quiz__answer__option" id="answer-${option}" tabindex="0">
-                  <label for="${option}">
-                        <input style="display: none" name="option" id="${option}" type="radio" value="${option}">
-                        <span class="quiz__option__alphabet">${alphabetOptions[index]}
-                        </span>${option}
-                        <img src="/assets/images/icon-correct.svg" alt="icon-correct" class="quiz__option__correct hidden">
-                        <img src="/assets/images/icon-error.svg" alt="icon-error" class="quiz__option__error hidden">
-                  </label>
-              </li>`;
-  });
 
-  quizAnswerChoices.innerHTML = options;
+  nextButton.handleClick = (event) => handleClickNext(quizState, event);
 
-  const quizOption = document.querySelectorAll(".quiz__answer__option");
-  quizOption.forEach((el) => {
-    el.addEventListener("click", function () {
-      noAnswerWarning.classList.add("hidden");
-      const radioInputs = document.querySelectorAll('input[name="option"]');
-      const checkedInput = Array.from(radioInputs).find(
-        (input) => input.value === el.id.split("-")[1]
-      );
-
-      checkedInput.checked = true;
-    });
-  });
-
-  clickOnKeyPress();
+  nextButton.addEventListener("click", nextButton.handleClick);
 }
 
-function getQuestion(quizData, topic, number) {
-  const chosenTopicQuizzes = quizData.find((data) => data.title === topic);
-
-  questionNumber.textContent = quizIndex + 1;
-  totalQuestionElement.textContent = chosenTopicQuizzes.questions.length;
-  const quiz = chosenTopicQuizzes.questions[number];
-
-  return quiz;
-}
-
-function startQuiz() {
-  quizMenu.classList.add("hidden");
-  quizQuestion.classList.remove("hidden");
-}
-
-function submitAnswer() {
+function handleSubmitAnswer(quizState, event) {
   const checkedOptionElement = document.querySelector(
     'input[name="option"]:checked'
   );
-
   if (!checkedOptionElement) {
-    noAnswerWarning.classList.remove("hidden");
-    return;
+    return toggleNoAnswerWarning(true);
   }
 
+  toggleNoAnswerWarning(false);
+
   const checkedOption = checkedOptionElement.value;
-  const correctOption = document.getElementById(`answer-${answer}`);
-  const correctAlphabetElement = correctOption.querySelector("span");
-  const correctIconElement = correctOption.querySelector(
+  const isCorrect = checkAnswer(quizState, checkedOption);
+  showCorrectAnswer(quizState);
+  if (!isCorrect) {
+    showIncorrectAnswer(checkedOption);
+  }
+  updateScore(isCorrect, quizState);
+  updateQuizIndex(quizState);
+  if (quizState.quizIndex < quizState.totalQuestions) {
+    toggleVisibility(submitButton, false);
+    toggleVisibility(nextButton, true);
+    setNextButton(quizState);
+  } else {
+    toggleVisibility(submitButton, false);
+    toggleVisibility(viewResultButton, true);
+    setViewResultButton(quizState);
+  }
+}
+
+function setSubmitButton(quizState) {
+  if (submitButton.handleSubmit) {
+    submitButton.removeEventListener("click", submitButton.handleSubmit);
+  }
+
+  submitButton.handleSubmit = (event) => handleSubmitAnswer(quizState, event);
+  submitButton.addEventListener("click", submitButton.handleSubmit);
+}
+
+function checkAnswer(quizState, chosenOption) {
+  const { questions, quizIndex } = quizState;
+  const answer = questions[quizIndex].answer;
+  return answer === chosenOption;
+}
+
+function applyAnswerStyles({
+  optionElement,
+  borderClass,
+  alphabetClass,
+  iconElement,
+}) {
+  optionElement.classList.add(borderClass);
+  if (alphabetClass) {
+    const alphabetElement = optionElement.querySelector("span");
+    alphabetElement.classList.add(alphabetClass);
+  }
+  toggleVisibility(iconElement, true);
+}
+
+function showCorrectAnswer(quizState) {
+  const { quizIndex, questions } = quizState;
+  const answer = questions[quizIndex].answer;
+  const correctOptionElement = document.getElementById(`answer__${answer}`);
+  const correctIconElement = correctOptionElement.querySelector(
     ".quiz__option__correct"
   );
 
-  correctOption.style.border = "3px solid var(--color-green)";
-  correctAlphabetElement.style.color = "var(--color-pure-white)";
-  correctAlphabetElement.style.backgroundColor = "var(--color-green)";
-  correctIconElement.classList.remove("hidden");
+  applyAnswerStyles({
+    optionElement: correctOptionElement,
+    borderClass: "quiz__correct-answer-border",
+    alphabetClass: "quiz__correct-answer-alphabet",
+    iconElement: correctIconElement,
+  });
+}
 
-  const isCorrect = checkAnswer(checkedOption, answer);
+function showIncorrectAnswer(chosenOption) {
+  const incorrectOptionElement = document.getElementById(
+    `answer__${chosenOption}`
+  );
+  const wrongIconElement = incorrectOptionElement.querySelector(
+    ".quiz__option__error"
+  );
 
-  const chosenAnswer = document.getElementById(`answer-${checkedOption}`);
-  const alphabetElement = chosenAnswer.querySelector("span");
+  applyAnswerStyles({
+    optionElement: incorrectOptionElement,
+    borderClass: "quiz__incorrect-answer-border",
+    alphabetClass: "quiz__incorrect-answer-alphabet",
+    iconElement: wrongIconElement,
+  });
+}
 
+function toggleNoAnswerWarning(showWarning) {
+  const noAnswerWarning = document.querySelector(".quiz__warning__no-answer");
+  toggleVisibility(noAnswerWarning, showWarning);
+}
+
+function updateScore(isCorrect, quizState) {
   if (isCorrect) {
-    score += 1;
-  } else {
-    const wrongIconElement = chosenAnswer.querySelector(".quiz__option__error");
-    chosenAnswer.style.border = "3px solid var(--color-red)";
-    alphabetElement.style.color = "var(--color-pure-white)";
-    alphabetElement.style.backgroundColor = "var(--color-red)";
-    wrongIconElement.classList.remove("hidden");
+    quizState.score += 1;
+  }
+}
+
+function selectQuizOption(el) {
+  toggleNoAnswerWarning(false);
+  checkRadioInput(el);
+}
+
+function checkRadioInput(el) {
+  const radioInputs = document.querySelectorAll('input[name="option"]');
+  const checkedInput = Array.from(radioInputs).find(
+    (input) => input.value === el.id.split("__")[1]
+  );
+  checkedInput.checked = true;
+}
+
+function attachOptionEventListener() {
+  const quizOptions = document.querySelectorAll(".quiz__answer__option");
+  quizOptions.forEach((el) => {
+    el.addEventListener("click", () => selectQuizOption(el));
+  });
+
+  selectOnKeyPress();
+}
+
+function handleClickNext(quizState) {
+  updateQuizContent(quizState);
+  toggleVisibility(nextButton, false);
+  toggleVisibility(submitButton, true);
+}
+
+function updateQuizIndex(quizState) {
+  quizState.quizIndex += 1;
+}
+
+function setViewResultButton(quizState) {
+  if (viewResultButton.handleClick) {
+    viewResultButton.removeEventListener("click", viewResultButton.handleClick);
   }
 
-  const radioOptions = quizAnswerChoices.querySelectorAll('input[type="radio"');
-
-  radioOptions.forEach((radio) => (radio.disabled = true));
-
-  submitButton.classList.add("hidden");
-  nextButton.classList.remove("hidden");
+  viewResultButton.handleClick = (event) => handleViewResult(quizState, event);
+  viewResultButton.addEventListener("click", viewResultButton.handleClick);
 }
 
-function checkAnswer(option, answer) {
-  return option === answer;
+function handleViewResult(quizState, event) {
+  showResultSection();
+  updateResultContent(quizState);
 }
 
-function showResult() {
-  quizQuestion.classList.add("hidden");
-  quizCompleted.classList.remove("hidden");
-  quizResultScore.textContent = score;
+function showResultSection() {
+  toggleVisibility(quizCompletedSection, true);
+  toggleVisibility(quizQuestionSection, false);
 }
 
-function playAgain() {
-  score = 0;
-  quizIndex = 0;
-  quizCompleted.classList.add("hidden");
-  quizMenu.classList.remove("hidden");
-  nextButton.classList.add("hidden");
-  submitButton.classList.remove("hidden");
-  showMenuSection();
-}
+function updateResultContent(quizState) {
+  const { topic, imageSource, score, totalQuestions } = quizState;
+  const quizCompletedTopic = document.querySelector(".quiz__completed__topic");
+  const quizCompletedIcon = document.getElementById("icon-quiz-completed");
+  const quizResultScore = document.querySelector(".quiz__result__score");
+  const quizCompletedTotal = document.getElementById("quiz-completed-total");
 
-function setCompletedQuizTopic(topic, iconQuizUrl, totalQuiz) {
   quizCompletedTopic.textContent = topic;
-  quizCompletedIcon.src = iconQuizUrl;
-  quizCompletedIcon.classList.add(`img-${topic}`);
-  quizCompletedTotal.textContent = totalQuiz;
+  quizCompletedIcon.src = imageSource;
+  quizResultScore.textContent = score;
+  quizCompletedTotal.textContent = totalQuestions;
 }
 
-function clickOnKeyPress() {
-  document.querySelectorAll('[tabindex="0"]').forEach((el) => {
+function playAgain(quizState) {
+  resetState(quizState);
+  toggleVisibility(quizCompletedSection, false);
+  toggleVisibility(quizMenuSection, true);
+  resetQuestionButton(quizState);
+}
+
+function resetState(quizState) {
+  Object.assign(quizState, initialQuizState);
+}
+
+function resetQuestionButton(quizState) {
+  toggleVisibility(viewResultButton, false);
+  toggleVisibility(submitButton, true);
+  setSubmitButton(quizState);
+}
+
+playAgainButton.addEventListener("click", () => playAgain(quizState));
+
+function selectOnKeyPress() {
+  document.querySelectorAll(".clickable").forEach((el) => {
     el.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         el.click(); // Simulate a click
@@ -256,6 +421,11 @@ function clickOnKeyPress() {
   });
 }
 
-submitButton.addEventListener("click", submitAnswer);
-
-quizPlayAgain.addEventListener("click", playAgain);
+function toggleKeyPress() {
+  const toggleThemeLabel = document.querySelector(".quiz__nav__label");
+  toggleThemeLabel.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      toggleThemeLabel.click(); // Simulate a click
+    }
+  });
+}
